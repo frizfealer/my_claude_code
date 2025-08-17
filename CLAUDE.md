@@ -2,6 +2,7 @@
 - Question assumptions before implementing
 - Understand the full context before creating new components
 - It's better to ask clarifying questions than to build the wrong thing
+- Use `uv` for Python projects (not pip/python directly)
 
 ### Quick Decision Framework
 When making rapid decisions:
@@ -61,6 +62,20 @@ When working on any project, I should:
    - Ask about deadlines and priorities when multiple approaches exist
    - Suggest quick wins vs long-term solutions when appropriate
    - Be explicit about trade-offs: "We can do X quickly now, but will need to refactor for Y later"
+
+### Python Project Standards
+
+When working with Python projects:
+
+1. **Always use `uv` for package management**:
+   - `uv run python script.py` instead of `python script.py`
+   - `uv run pytest` instead of `pytest`
+   - `uv add package` instead of `pip install package`
+   - `uv sync` to install dependencies from pyproject.toml
+   - `uv pip compile` for requirements.txt if needed
+
+2. **Check for `uv` first**: If pyproject.toml exists, assume uv is being used
+3. **Virtual environment**: uv handles this automatically, don't create separate venvs
 
 ### Code Quality Standards
 
