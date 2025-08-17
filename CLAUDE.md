@@ -196,3 +196,15 @@ Example of applying these principles:
    - Never assert exact responses: `assert result == "specific text"` ❌
    - Assert structure and valid options: `assert result.name in ["option1", "option2"]` ✅
    - AI responses vary; test the shape, not the content
+
+### Unit Test Mocking Gotchas
+
+1. **Namespace Collisions in Mocking**:
+   - Mocking one package can break others in the same namespace
+   - Example: Mocking `google.genai` breaks `google.api_core` that googleapiclient needs
+   - Solution: Stub the import chain before it reaches the conflicting package
+
+2. **Document WHY You Mock**:
+   - Don't assume it's for "missing dependencies" - dependencies might be installed
+   - Common reasons: namespace conflicts, avoiding external calls, preventing side effects
+   - Add a comment explaining the specific reason (e.g., "# Prevents namespace collision")
