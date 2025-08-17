@@ -173,3 +173,26 @@ Example of applying these principles:
 - "I understand you want to remove caching, but have you considered using a more intelligent cache key strategy instead? This would address the hit rate issue while preserving performance benefits."
 - "Before we remove query_intent entirely, let me explain why it might be valuable for analytics and routing. Would you like to explore a middle ground?"
 - "This change would work, but it might cause issues with X. A better approach might be Y because..."
+
+### Integration Test Best Practices
+
+1. **Centralize Shared Test Configuration**:
+   - Put `load_dotenv()` and common test markers in `tests/conftest.py`, not in individual test files
+   - Create reusable skip conditions: `pytest_integration = pytest.mark.skipif(...)`
+   - This prevents duplication and ensures consistency across all integration tests
+
+2. **When APIs Change, Update Systematically**:
+   - Use `grep -r "old_pattern" tests/` to find ALL occurrences before fixing
+   - Update related tests together in batches using `replace_all: true` in MultiEdit
+   - Don't just fix the failing test - similar issues likely exist in other test files
+   
+   **Common cases where this applies:**
+   - Parameter name changes (e.g., `available_experts` → `available_domains`)
+   - Function renames (e.g., `search_internet` → `search_internet_async`)
+   - Method signature changes (e.g., removing/adding parameters)
+   - When you see `TypeError: takes X arguments but Y were given`, search for all calls
+
+3. **Write Tolerant Assertions for AI/LLM Tests**:
+   - Never assert exact responses: `assert result == "specific text"` ❌
+   - Assert structure and valid options: `assert result.name in ["option1", "option2"]` ✅
+   - AI responses vary; test the shape, not the content
