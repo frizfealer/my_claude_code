@@ -98,6 +98,63 @@ When working with Python projects:
 7. Output capture: Use capsys for testing printed output
 8. Avoid using class: Use pure function for each unit tests. Only using a class to organize if the tests should be group together sharing context.
 
+### Test Artifact Cleanup Principles
+
+**Tests must never leave artifacts in the codebase after execution.** Clean test environments are critical for reproducible results and clean repositories.
+
+1. **Use pytest's tmp_path fixture for all file operations**:
+   ```python
+   def test_writes_file(tmp_path):
+       file_path = tmp_path / "test_output.txt"
+       # tmp_path automatically cleaned up after test
+   ```
+
+2. **For tests that don't need persistence, explicitly disable it**:
+   ```python
+   # When testing non-persistence features
+   mgr = StateManager(persist_to_disk=False)
+   ```
+
+3. **Use pytest fixtures for setup/teardown of test resources**:
+   ```python
+   @pytest.fixture
+   def clean_test_dir():
+       test_dir = Path("test_artifacts")
+       test_dir.mkdir(exist_ok=True)
+       yield test_dir
+       shutil.rmtree(test_dir)  # Cleanup after test
+   ```
+
+4. **Best practices hierarchy** (in order of preference):
+   - **tmp_path fixture**: Automatic cleanup, isolated per test
+   - **tmpdir fixture**: Legacy version of tmp_path
+   - **Custom fixtures with yield**: For complex setup/teardown
+   - **Try/finally blocks**: Only when fixtures aren't suitable
+   - **atexit handlers**: Last resort for process-level cleanup
+
+5. **Common patterns to avoid**:
+   ```python
+   # BAD: Creates files in project directory
+   def test_bad():
+       with open("test_output.txt", "w") as f:
+           f.write("data")
+   
+   # GOOD: Uses temporary directory
+   def test_good(tmp_path):
+       file = tmp_path / "test_output.txt"
+       file.write_text("data")
+   ```
+
+6. **For integration tests with real services**:
+   - Use unique test namespaces/prefixes
+   - Clean up in fixture teardown
+   - Consider using test containers or mocks
+
+7. **Verify cleanup in CI/CD**:
+   - Add a post-test check for unexpected files
+   - Use `git status --porcelain` to detect uncommitted artifacts
+   - Fail the build if artifacts are detected
+
 ### Documentation Guidelines
 
 When writing documentation:
